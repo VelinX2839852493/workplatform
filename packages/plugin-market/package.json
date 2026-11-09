@@ -12,6 +12,7 @@
     }
   },
   "dependencies": {
+    "@workplatform/ui-slots": "workspace:*",
     "@deepseek-ai/cordis": "^4.0.5",
     "@workplatform/app-boot": "workspace:*"
   },

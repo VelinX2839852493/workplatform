@@ -1,36 +1,25 @@
 /**
  * @author Codex
- * @date 2026-11-07
- * Electron 预加载入口：通过隔离桥接暴露插件查询和开关两个操作，编译为 sandbox 支持的 CommonJS。
+ * @date 2026-11-09
+ * 隔离 preload：暴露通用注册表快照和插件有限请求，不暴露任意 IPC 或文件操作。
  */
 import electron = require('electron');
-import type { PluginMarketClient, PluginMarketState } from './plugin-market-api.js';
+import type { SlotSnapshot } from '@workplatform/ui-slots';
+import type { DesktopUiClient } from './desktop-ui-api.js';
 
 const { contextBridge, ipcRenderer } = electron;
-// 等价展开：const contextBridge = electron.contextBridge; const ipcRenderer = electron.ipcRenderer;
-
-const client: PluginMarketClient = {
-  /** @returns 主进程提供的市场插件状态。 */
-  getState(): Promise<PluginMarketState> {
-    return ipcRenderer.invoke('plugin-market:state');
-  },
-  /** @param id 插件标识。@param enabled 是否加载。@returns 更新后的插件状态列表。 */
-  setEnabled(id: string, enabled: boolean): Promise<PluginMarketState> {
-    return ipcRenderer.invoke('plugin-market:set-enabled', id, enabled);
-  },
-  /** @param listener 市场服务变化回调。@returns 取消当前监听的函数。 */
-  onStateChanged(listener: (state: PluginMarketState) => void): () => void {
-    /** @param event IPC 事件，仅在隔离层接收。@param state 可序列化的市场状态。@returns 无返回值。 */
-    function handleState(event: Electron.IpcRendererEvent, state: PluginMarketState): void {
-      listener(state);
-    }
-    ipcRenderer.on('plugin-market:state', handleState);
-    /** @returns 无返回值，取消当前回调。 */
-    function unsubscribe(): void {
-      ipcRenderer.removeListener('plugin-market:state', handleState);
-    }
-    return unsubscribe;
+// 等价于分别读取 electron.contextBridge 和 electron.ipcRenderer。
+const client: DesktopUiClient = {
+  /** @returns 主进程的当前注册表快照。 */
+  getSnapshot() { return ipcRenderer.invoke('desktop-ui:snapshot'); },
+  /** @param method 已注册的方法。@param args 有限请求参数。@returns 插件返回值。 */
+  invoke(method, ...args) { return ipcRenderer.invoke('desktop-ui:invoke', method, args); },
+  /** @param listener UI 快照变化回调。@returns 取消订阅函数。 */
+  onChanged(listener) {
+    /** @param event 隔离层事件。@param snapshot 新快照。@returns 无返回值。 */
+    function handle(event: Electron.IpcRendererEvent, snapshot: SlotSnapshot): void { listener(snapshot); }
+    ipcRenderer.on('desktop-ui:changed', handle);
+    return () => ipcRenderer.removeListener('desktop-ui:changed', handle);
   }
 };
-
-contextBridge.exposeInMainWorld('pluginMarket', client);
+contextBridge.exposeInMainWorld('desktopUi', client);

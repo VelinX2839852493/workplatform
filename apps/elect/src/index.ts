@@ -6,7 +6,7 @@
 import boot, { type Context } from '@workplatform/app-boot';
 import { app, BrowserWindow, dialog } from 'electron';
 import { fileURLToPath } from 'node:url';
-import { registerPluginMarketIpc } from './plugin-market-ipc.js';
+import { registerDesktopUiIpc } from './desktop-ui-ipc.js';
 
 let appContext: Context;
 
@@ -36,7 +36,20 @@ async function createMainWindow(): Promise<void> {
     }
   });
 
-  registerPluginMarketIpc(mainWindow, appContext);
+  registerDesktopUiIpc(mainWindow, appContext);
+  mainWindow.webContents.on('will-prevent-unload', (event) => {
+    // 页面有未保存草稿时请求关闭确认；取消此事件等价于允许页面卸载。
+    const choice = dialog.showMessageBoxSync(mainWindow, {
+      type: 'question',
+      title: '未保存的修改',
+      message: '有未保存的插件修改，是否放弃修改并关闭？',
+      buttons: ['继续编辑', '放弃修改并关闭'],
+      defaultId: 0,
+      cancelId: 0,
+      noLink: true
+    });
+    if (choice === 1) event.preventDefault();
+  });
   mainWindow.removeMenu();
   await mainWindow.loadFile(fileURLToPath(new URL('../index.html', import.meta.url)));
 }

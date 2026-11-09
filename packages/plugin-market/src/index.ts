@@ -5,6 +5,7 @@
  */
 import type { Context, Plugin } from '@deepseek-ai/cordis';
 import type { PluginRuntime } from '@workplatform/app-boot';
+import { registerMarketRequests } from './requests.js';
 
 /** 市场插件对外提供的管理接口，复用启动内核的通用生命周期契约。 */
 export type PluginMarket = PluginRuntime;
@@ -19,7 +20,7 @@ declare module '@deepseek-ai/cordis' {
 
 const pluginMarket: Plugin.Object = {
   name: 'plugin-market',
-  inject: ['pluginRuntime'],
+  inject: ['pluginRuntime', 'slots'],
   /**
    * 将市场服务注册到当前插件 Fiber，而非根 Context。
    * @param ctx 由 Cordis 注入通用运行时后的插件上下文。
@@ -27,6 +28,13 @@ const pluginMarket: Plugin.Object = {
    */
   apply(ctx: Context): void {
     ctx.provide('pluginMarket', ctx.pluginRuntime);
+    registerMarketRequests(ctx, ctx.pluginRuntime);
+    ctx.effect(() => ctx.slots.register({
+      name: 'main', key: 'plugin-market', entry: new URL('./client.js', import.meta.url).href
+    }));
+    ctx.effect(() => ctx.slots.register({
+      name: 'sidebar.panellist', id: 'plugin-market', label: '插件市场', order: 10
+    }));
   }
 };
 

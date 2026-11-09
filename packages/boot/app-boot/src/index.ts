@@ -8,6 +8,7 @@ import { LocalPluginRuntime } from './plugin-runtime.js';
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { readDesktopPlugins } from './read-desktop-plugins.js';
+import { LocalSlotRegistry } from '@workplatform/ui-slots';
 
 export { readDesktopPlugins, type DesktopPlugin } from './read-desktop-plugins.js';
 export type { Context } from '@deepseek-ai/cordis';
@@ -24,6 +25,7 @@ export default async function boot(appName: string): Promise<Context> {
   const desktopPlugins = existsSync(patchPath) ? readDesktopPlugins(patchPath) : [];
   // 以 bundle/package.json 为起点查找插件。
   const ctx = new Context();
+  ctx.provide('slots', new LocalSlotRegistry());
   const runtime = new LocalPluginRuntime(ctx, desktopPlugins, join(dirname(patchPath), 'package.json'));
   ctx.provide('pluginRuntime', runtime);
   ctx.logger(appName).debug('启动应用，注册 %d 个桌面插件', desktopPlugins.length);

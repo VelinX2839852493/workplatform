@@ -1,0 +1,13 @@
+{
+  "name": "@workplatform/ui-slots",
+  "version": "0.1.0",
+  "private": true,
+  "description": "桌面插件的侧栏与主面板注册契约和生命周期注册表",
+  "type": "module",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "development": "./src/index.ts", "default": "./dist/index.js" },
+    "./client": { "types": "./dist/client.d.ts", "development": "./src/client.ts", "default": "./dist/client.js" }
+  },
+  "dependencies": { "@deepseek-ai/cordis": "^4.0.5" },
+  "scripts": { "test": "tsx --test test/*.test.ts" }
+}

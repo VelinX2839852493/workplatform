@@ -1,0 +1,10 @@
+/**
+ * @author Codex
+ * @date 2026-11-09
+ * UI 注册契约类型检查，包含面板 DOM 类型与注册表测试。
+ */
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "lib": ["ES2023", "DOM"] },
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}

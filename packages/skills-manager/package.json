@@ -1,0 +1,25 @@
+{
+  "name": "@workplatform/skills-manager",
+  "version": "0.1.0",
+  "private": true,
+  "description": "管理本机用户级 Codex Skills 的 Cordis 插件",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@workplatform/ui-slots": "workspace:*",
+    "@deepseek-ai/cordis": "^4.0.5",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@workplatform/app-boot": "workspace:*"
+  },
+  "scripts": {
+    "test": "tsx --test test/*.test.ts"
+  }
+}

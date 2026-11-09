@@ -18,7 +18,7 @@
       <p>Workplatform</p>
       <nav aria-label="主导航">
         <a href="#workspace" aria-current="page">工作台</a>
-        <p id="market-navigation" hidden><a href="#plugin-market">插件市场</a></p>
+        <div id="plugin-navigation"></div>
       </nav>
       <div class="sidebar-footer">
         <button type="button" commandfor="settings-dialog" command="show-modal" aria-haspopup="dialog">设置</button>
@@ -28,16 +28,8 @@
 
     <main>
       <section id="workspace"><h1>工作台</h1></section>
-      <section id="plugin-market" hidden>
-        <h1>插件市场</h1>
-        <p>管理本地配置的插件，无需重启应用。</p>
-        <button id="refresh-plugins" type="button">刷新列表</button>
-        <p id="market-message" role="status" aria-live="polite"></p>
-        <table id="plugin-table" hidden>
-          <thead><tr><th scope="col">插件</th><th scope="col">标识</th><th scope="col">状态</th><th scope="col">操作</th></tr></thead>
-          <tbody id="plugin-list"></tbody>
-        </table>
-      </section>
+      <p id="shell-message" role="status" aria-live="polite"></p>
+      <div id="plugin-panels"></div>
     </main>
 
     <dialog id="settings-dialog" aria-labelledby="settings-title" aria-describedby="settings-description" closedby="any">

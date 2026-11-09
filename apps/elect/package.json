@@ -5,8 +5,9 @@
   "description": "包含侧边栏和设置模态框的 Electron 应用",
   "type": "module",
   "main": "dist/index.js",
+  "scripts": { "test": "tsc -p tsconfig.build.json && tsx --test test/*.test.ts" },
   "dependencies": {
     "@workplatform/app-boot": "workspace:*",
-    "@workplatform/plugin-market": "workspace:*"
+    "@workplatform/ui-slots": "workspace:*"
   }
 }

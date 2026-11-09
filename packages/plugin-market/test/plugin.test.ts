@@ -12,6 +12,7 @@ import { test, type TestContext } from 'node:test';
 import { Context } from '@deepseek-ai/cordis';
 import boot, { LocalPluginRuntime } from '@workplatform/app-boot';
 import pluginMarket from '../src/index.js';
+import { LocalSlotRegistry } from '@workplatform/ui-slots';
 
 /**
  * 验证市场默认导出是真实插件，服务归插件 Fiber 所有并随卸载移除。
@@ -20,6 +21,7 @@ import pluginMarket from '../src/index.js';
  */
 async function verifiesPluginLifecycle(t: TestContext): Promise<void> {
   const ctx = new Context();
+  ctx.provide('slots', new LocalSlotRegistry());
   t.after(ctx.fiber.dispose);
   const runtime = new LocalPluginRuntime(ctx, [], resolve('package.json'));
   ctx.provide('pluginRuntime', runtime);

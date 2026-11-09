@@ -26,15 +26,18 @@ importers:
       '@workplatform/app-boot':
         specifier: workspace:*
         version: link:../../packages/boot/app-boot
-      '@workplatform/plugin-market':
+      '@workplatform/ui-slots':
         specifier: workspace:*
-        version: link:../../packages/plugin-market
+        version: link:../../packages/ui-slots
 
   packages/boot/app-boot:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.5
-        version: 4.1.0
+        version: 4.0.5
+      '@workplatform/ui-slots':
+        specifier: workspace:*
+        version: link:../../ui-slots
       yaml:
         specifier: ^2.9.1
         version: 2.9.1
@@ -44,6 +47,9 @@ importers:
       '@workplatform/plugin-market':
         specifier: workspace:*
         version: link:../plugin-market
+      '@workplatform/skills-manager':
+        specifier: workspace:*
+        version: link:../skills-manager
 
   packages/core: {}
 
@@ -51,27 +57,52 @@ importers:
     dependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.5
-        version: 4.1.0
+        version: 4.0.5
+      '@workplatform/app-boot':
+        specifier: workspace:*
+        version: link:../boot/app-boot
+      '@workplatform/ui-slots':
+        specifier: workspace:*
+        version: link:../ui-slots
+
+  packages/skills-manager:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.5
+        version: 4.0.5
+      '@workplatform/ui-slots':
+        specifier: workspace:*
+        version: link:../ui-slots
+      yaml:
+        specifier: ^2.9.1
+        version: 2.9.1
+    devDependencies:
       '@workplatform/app-boot':
         specifier: workspace:*
         version: link:../boot/app-boot
 
+  packages/ui-slots:
+    dependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.5
+        version: 4.0.5
+
 packages:
 
-  '@deepseek-ai/cordis@4.1.0':
-    resolution: {integrity: sha512-CJrjNyBkKn1SfvBQUcgFYKFnLjS+uKrhdMsbHU60xabvi12d+xQ+IQSNlME5Z+B+4Zi6n4BDknKY94tEPeo47w==}
+  '@deepseek-ai/cordis@4.0.5':
+    resolution: {integrity: sha512-Sktq5axy0owk9PdnivBRNOJjHEVEibCt0+TDDZcv0+UH2KS1M910fX4kn5y45YFsrpZIi1mJf/1s5VzywMUnyg==}
     hasBin: true
     peerDependencies:
-      '@deepseek-ai/cordis-plugin-include': ~1.1.0
-      '@deepseek-ai/cordis-plugin-loader': ~1.1.0
+      '@deepseek-ai/cordis-plugin-include': ~1.0.10
+      '@deepseek-ai/cordis-plugin-loader': ~1.0.6
     peerDependenciesMeta:
       '@deepseek-ai/cordis-plugin-include':
         optional: true
       '@deepseek-ai/cordis-plugin-loader':
         optional: true
 
-  '@deepseek-ai/cosmokit@1.9.0':
-    resolution: {integrity: sha512-5O1S53mZiJyZYcvxxD0Qv1EY7qFPSxbGyD8CbVK6gw7W9FvcXZj2YIX1ZkOqyQQ3Xt2rFkZDHJv0+V3Zmmp8CA==}
+  '@deepseek-ai/cosmokit@1.8.6':
+    resolution: {integrity: sha512-ZSD/fN52L498LBIOYwjIOlaLv5veY6ZEwI2yzvZUKQtctn0QAPqu8tKdJ+OF5+Tv6NBq1U+wJWH+QI6OGy5EvQ==}
 
   '@electron-internal/extract-zip@1.0.8':
     resolution: {integrity: sha512-8iajeLFbzNwM0m3AsQZSZgYREWglAImyGvvFSWU34FgMW8sHlzdwj9QKvv9dgN7jMP591EFUF/sLOC3Jl9YIjQ==}
@@ -434,12 +465,12 @@ packages:
 
 snapshots:
 
-  '@deepseek-ai/cordis@4.1.0':
+  '@deepseek-ai/cordis@4.0.5':
     dependencies:
-      '@deepseek-ai/cosmokit': 1.9.0
+      '@deepseek-ai/cosmokit': 1.8.6
       '@standard-schema/spec': 1.1.0
 
-  '@deepseek-ai/cosmokit@1.9.0': {}
+  '@deepseek-ai/cosmokit@1.8.6': {}
 
   '@electron-internal/extract-zip@1.0.8': {}
 

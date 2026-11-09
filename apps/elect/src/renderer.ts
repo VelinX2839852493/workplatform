@@ -1,107 +1,106 @@
 /**
  * @author Codex
- * @date 2026-11-07
- * 市场页面：切换侧栏视图，展示本地插件状态，通过 preload 接口加载或关闭插件。
+ * @date 2026-11-09
+ * 通用 UI 宿主：订阅插槽注册表生成侧栏并挂载插件页面，撤销注册时释放页面并暂存草稿。
  */
-import type { PluginSummary } from '@workplatform/plugin-market';
-import type { PluginMarketState } from './plugin-market-api.js';
+import type { MainEntry, SlotSnapshot } from '@workplatform/ui-slots';
+import type { PanelDraft, PanelInstance, PanelModule } from '@workplatform/ui-slots/client';
+import type {} from './desktop-ui-api.js';
+
+/** 单次挂载记录的对象身份用于取消迟到的动态模块响应。 */
+interface MountedPanel {
+  entry: MainEntry;
+  container: HTMLElement;
+  instance: PanelInstance | undefined;
+}
 
 const workspace = document.querySelector<HTMLElement>('#workspace')!;
-const marketPage = document.querySelector<HTMLElement>('#plugin-market')!;
-const pluginList = document.querySelector<HTMLTableSectionElement>('#plugin-list')!;
-const table = document.querySelector<HTMLTableElement>('#plugin-table')!;
-const message = document.querySelector<HTMLParagraphElement>('#market-message')!;
-const refreshButton = document.querySelector<HTMLButtonElement>('#refresh-plugins')!;
-const marketNavigation = document.querySelector<HTMLParagraphElement>('#market-navigation')!;
-let marketAvailable = false;
-// 非空断言等价于将这些静态模板中始终存在的元素明确标为对应 DOM 元素类型。
+const navigation = document.querySelector<HTMLElement>('#plugin-navigation')!;
+const panels = document.querySelector<HTMLElement>('#plugin-panels')!;
+const message = document.querySelector<HTMLElement>('#shell-message')!;
+// 非空断言等价于明确这些由宿主静态模板提供的元素类型。
+const mounted = new Map<string, MountedPanel>();
+const drafts = new Map<string, PanelDraft>();
+let revision = -1;
 
-const stateLabels: Record<PluginSummary['state'], string> = {
-  loaded: '已加载', waiting: '等待依赖', loading: '处理中', failed: '加载失败', closed: '已关闭'
-};
-
-/**
- * 将市场状态渲染为默认样式表格，插件文本仅以纯文本写入。
- * @param plugins 主进程返回的插件状态。
- * @returns 无返回值。
- */
-function renderPlugins(plugins: PluginSummary[]): void {
-  pluginList.replaceChildren();
-  table.hidden = plugins.length === 0;
-  message.textContent = plugins.length === 0 ? '暂无已配置插件。' : '';
-  for (const plugin of plugins) {
-    const row = document.createElement('tr');
-    for (const value of [plugin.name, plugin.id, stateLabels[plugin.state]]) {
-      const cell = document.createElement('td');
-      cell.textContent = value;
-      row.append(cell);
-    }
-    const actionCell = document.createElement('td');
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = plugin.state === 'closed' ? '加载' : '关闭';
-    button.setAttribute('aria-label', button.textContent + ' ' + plugin.name);
-    button.disabled = plugin.state === 'loading';
-    /** @returns 操作和状态刷新完成后的 Promise。 */
-    async function togglePlugin(): Promise<void> {
-      button.disabled = true;
-      try {
-        renderState(await window.pluginMarket.setEnabled(plugin.id, plugin.state === 'closed'));
-      } catch (error) {
-        // IPC 错误在页面入口展示；同时恢复实际 Fiber 状态，允许关闭失败的实例。
-        await refreshPlugins();
-        message.textContent = error instanceof Error ? error.message : String(error);
-      } finally {
-        button.disabled = plugin.state === 'loading';
-      }
-    }
-    button.addEventListener('click', togglePlugin);
-    actionCell.append(button);
-    row.append(actionCell);
-    pluginList.append(row);
-  }
+/** @param error 插件加载或生命周期错误。@returns 无返回值，显示宿主错误。 */
+function showError(error: unknown): void {
+  message.textContent = error instanceof Error ? error.message : String(error);
 }
 
-/** @returns 插件状态刷新后兑现的 Promise，失败信息显示在当前页面。 */
-async function refreshPlugins(): Promise<void> {
-  refreshButton.disabled = true;
-  message.textContent = '正在读取插件列表…';
-  try {
-    renderState(await window.pluginMarket.getState());
-  } catch (error) {
-    message.textContent = error instanceof Error ? error.message : String(error);
-  } finally {
-    refreshButton.disabled = false;
-  }
-}
-
-/** @returns 无返回值，仅在市场插件可用时允许显示该页面。 */
+/** @returns 无返回值，按已注册页面切换路由，未知或已卸载页面回到工作台。 */
 function updateRoute(): void {
-  const isMarket = marketAvailable && location.hash === '#plugin-market';
-  workspace.hidden = isMarket;
-  marketPage.hidden = !isMarket;
+  let key: string;
+  try { key = decodeURIComponent(location.hash.slice(1)); }
+  catch { key = ''; }
+  const selected = mounted.has(key) ? key : 'workspace';
+  if (key && key !== selected) location.hash = '#workspace';
+  workspace.hidden = selected !== 'workspace';
+  for (const [id, panel] of mounted) panel.container.hidden = id !== selected;
   for (const link of document.querySelectorAll<HTMLAnchorElement>('nav a')) {
-    if (link.hash === (isMarket ? '#plugin-market' : '#workspace')) link.setAttribute('aria-current', 'page');
+    if (link.hash === '#' + encodeURIComponent(selected)) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   }
 }
 
-/** @param state 主进程返回的市场可用性与插件列表。@returns 无返回值。 */
-function renderState(state: PluginMarketState): void {
-  marketAvailable = state.available;
-  marketNavigation.hidden = !marketAvailable;
-  renderPlugins(state.plugins);
-  if (!marketAvailable && location.hash === '#plugin-market') location.hash = '#workspace';
+/** @param entry 新注册的页面模块。@returns 模块加载和挂载完成后的 Promise。 */
+async function mountPanel(entry: MainEntry): Promise<void> {
+  const container = document.createElement('section');
+  container.dataset.panel = entry.key;
+  container.hidden = true;
+  container.textContent = '正在加载面板…';
+  const record: MountedPanel = { entry, container, instance: undefined };
+  mounted.set(entry.key, record);
+  panels.append(container);
+  try {
+    const module: { default: PanelModule } = await import(entry.entry);
+    if (mounted.get(entry.key) !== record) return;
+    record.instance = module.default.mount(container, { client: window.desktopUi, draft: drafts.get(entry.key) });
+    drafts.delete(entry.key);
+  } catch (error) {
+    if (mounted.get(entry.key) === record) container.textContent = '面板加载失败：' + (error instanceof Error ? error.message : String(error));
+  }
+}
+
+/** @param snapshot 主进程最新完整注册表。@returns 无返回值，按注册内容注入导航与页面。 */
+function renderSnapshot(snapshot: SlotSnapshot): void {
+  if (snapshot.revision <= revision) return;
+  revision = snapshot.revision;
+  const main = new Map(snapshot.entries.filter((entry): entry is MainEntry => entry.name === 'main').map(entry => [entry.key, entry]));
+  for (const [key, panel] of mounted) {
+    if (main.get(key)?.entry === panel.entry.entry) continue;
+    try {
+      const draft = panel.instance?.snapshot?.();
+      if (draft) drafts.set(key, draft);
+    } catch (error) { showError(error); }
+    try { panel.instance?.dispose(); }
+    catch (error) { showError(error); }
+    panel.container.remove();
+    mounted.delete(key);
+  }
+  for (const [key, entry] of main) {
+    if (!mounted.has(key)) void mountPanel(entry);
+  }
+  navigation.replaceChildren();
+  const sidebar = snapshot.entries.filter(entry => entry.name === 'sidebar.panellist').sort((left, right) => left.order - right.order);
+  for (const entry of sidebar) {
+    if (!main.has(entry.id)) continue;
+    const row = document.createElement('p');
+    const link = document.createElement('a');
+    link.href = '#' + encodeURIComponent(entry.id);
+    link.textContent = entry.label;
+    row.append(link);
+    navigation.append(row);
+  }
   updateRoute();
 }
 
-/** @returns 侧栏页面切换及必要的状态刷新完成时兑现的 Promise。 */
-async function showPage(): Promise<void> {
-  updateRoute();
-  if (marketAvailable && location.hash === '#plugin-market') await refreshPlugins();
-}
-
-refreshButton.addEventListener('click', refreshPlugins);
-window.addEventListener('hashchange', showPage);
-window.pluginMarket.onStateChanged(renderState);
-void refreshPlugins();
+window.addEventListener('hashchange', updateRoute);
+window.addEventListener('beforeunload', (event) => {
+  // @param event 页面卸载事件。@returns 无返回值，由主进程统一确认未保存的插件修改。
+  const dirty = Array.from(drafts.values()).some(draft => draft.dirty)
+    || Array.from(mounted.values()).some(panel => panel.instance?.snapshot?.().dirty);
+  if (dirty) event.preventDefault();
+});
+window.desktopUi.onChanged(renderSnapshot);
+void window.desktopUi.getSnapshot().then(renderSnapshot).catch(showError);

@@ -1,0 +1,17 @@
+/**
+ * @author Codex
+ * @date 2026-11-09
+ * Skills 插件构建配置，输出可由 bundle 加载的代码及公共类型。
+ */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "noEmitOnError": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*.ts"]
+}

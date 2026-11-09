@@ -1,0 +1,17 @@
+/**
+ * @author Codex
+ * @date 2026-11-09
+ * UI 注册契约和运行时构建，输出 JavaScript 及公共类型。
+ */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "noEmitOnError": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*.ts"]
+}

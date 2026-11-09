@@ -1,0 +1,10 @@
+/**
+ * @author Codex
+ * @date 2026-11-09
+ * Skills 插件类型配置，检查服务、插件入口和隔离文件测试。
+ */
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "lib": ["ES2023", "DOM"] },
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}
