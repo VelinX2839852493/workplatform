@@ -1,0 +1,9 @@
+/**
+ * @author Codex
+ * @date 2026-11-06
+ * app-boot 类型检查配置：继承根目录共享规则，检查本包源码。
+ */
+{
+  "extends": "../../../tsconfig.base.json",
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}

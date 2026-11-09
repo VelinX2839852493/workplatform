@@ -1,0 +1,17 @@
+/**
+ * @author Codex
+ * @date 2026-11-07
+ * 插件市场构建配置：由根目录统一生成本包 JavaScript、声明和源码映射。
+ */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "noEmitOnError": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*.ts"]
+}

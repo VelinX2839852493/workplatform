@@ -1,0 +1,21 @@
+{
+  "name": "@workplatform/plugin-market",
+  "version": "0.1.0",
+  "private": true,
+  "description": "由 bundle 配置加载的 Cordis 插件市场插件",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "^4.0.5",
+    "@workplatform/app-boot": "workspace:*"
+  },
+  "scripts": {
+    "test": "tsx --test test/*.test.ts"
+  }
+}

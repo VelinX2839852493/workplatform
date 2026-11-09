@@ -1,0 +1,49 @@
+<!doctype html>
+<!--
+  @author Codex
+  @date 2026-11-07
+  Electron 工作台：左侧栏提供工作台和底部设置入口，使用原生 dialog 打开模态设置面板。
+-->
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
+    <title>Workplatform</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script type="module" src="./dist/renderer.js"></script>
+  </head>
+  <body>
+    <aside aria-label="主侧栏">
+      <p>Workplatform</p>
+      <nav aria-label="主导航">
+        <a href="#workspace" aria-current="page">工作台</a>
+        <p id="market-navigation" hidden><a href="#plugin-market">插件市场</a></p>
+      </nav>
+      <div class="sidebar-footer">
+        <button type="button" commandfor="settings-dialog" command="show-modal" aria-haspopup="dialog">设置</button>
+        <!-- command="show-modal" 等价于通过点击事件调用 settingsDialog.showModal()。 -->
+      </div>
+    </aside>
+
+    <main>
+      <section id="workspace"><h1>工作台</h1></section>
+      <section id="plugin-market" hidden>
+        <h1>插件市场</h1>
+        <p>管理本地配置的插件，无需重启应用。</p>
+        <button id="refresh-plugins" type="button">刷新列表</button>
+        <p id="market-message" role="status" aria-live="polite"></p>
+        <table id="plugin-table" hidden>
+          <thead><tr><th scope="col">插件</th><th scope="col">标识</th><th scope="col">状态</th><th scope="col">操作</th></tr></thead>
+          <tbody id="plugin-list"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <dialog id="settings-dialog" aria-labelledby="settings-title" aria-describedby="settings-description" closedby="any">
+      <h2 id="settings-title">设置</h2>
+      <p id="settings-description">暂无可配置项。</p>
+      <form method="dialog"><button type="submit" autofocus>关闭</button></form>
+    </dialog>
+  </body>
+</html>

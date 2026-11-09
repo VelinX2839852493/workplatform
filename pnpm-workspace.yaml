@@ -1,0 +1,12 @@
+# @author Codex
+# @date 2026-11-07
+# 声明全部工作区，使用 Electron 支持的平铺依赖布局，并仅放行 esbuild 的必要安装脚本。
+packages:
+  - packages/*
+  - packages/boot/*
+  - apps/*
+
+nodeLinker: hoisted
+
+allowBuilds:
+  esbuild: true

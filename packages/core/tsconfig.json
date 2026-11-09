@@ -1,0 +1,9 @@
+/**
+ * @author Codex
+ * @date 2026-11-06
+ * core 类型检查配置：继承根目录规则，覆盖公共源码及行为测试。
+ */
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}

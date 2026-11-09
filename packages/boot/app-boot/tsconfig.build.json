@@ -1,0 +1,17 @@
+/**
+ * @author Codex
+ * @date 2026-11-06
+ * app-boot 构建配置：将本包源码编译为 JavaScript、类型声明及源码映射。
+ */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "noEmitOnError": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*.ts"]
+}

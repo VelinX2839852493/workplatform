@@ -1,0 +1,25 @@
+{
+  "name": "workplatform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "基于 pnpm workspace 的 TypeScript 多包项目",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "packageManager": "pnpm@11.7.0",
+  "scripts": {
+    "dev": "pnpm start",
+    "typecheck": "tsc -p packages/boot/app-boot/tsconfig.build.json && tsc -p packages/plugin-market/tsconfig.build.json && tsc --noEmit -p packages/core/tsconfig.json && tsc --noEmit -p packages/boot/app-boot/tsconfig.json && tsc --noEmit -p packages/plugin-market/tsconfig.json && tsc --noEmit -p apps/elect/tsconfig.json",
+    "build": "tsc -p packages/core/tsconfig.build.json && tsc -p packages/boot/app-boot/tsconfig.build.json && tsc -p packages/plugin-market/tsconfig.build.json && tsc -p apps/elect/tsconfig.build.json",
+    "start": "pnpm run build && electron apps/elect",
+    "test": "pnpm -r --if-present run test",
+    "check": "pnpm run typecheck && pnpm test && pnpm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "electron": "^45.2.3",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

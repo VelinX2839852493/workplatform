@@ -1,0 +1,21 @@
+{
+  "name": "@workplatform/app-boot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "读取 YAML 插件列表并按顺序注册 Cordis 插件的应用启动包",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "^4.0.5",
+    "yaml": "^2.9.1"
+  },
+  "scripts": {
+    "test": "tsx --test test/*.test.ts"
+  }
+}

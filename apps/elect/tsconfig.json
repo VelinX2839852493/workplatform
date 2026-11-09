@@ -1,0 +1,12 @@
+/**
+ * @author Codex
+ * @date 2026-11-06
+ * elect 类型检查配置：继承根目录规则，检查 Electron 主进程源码。
+ */
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.cts"]
+}

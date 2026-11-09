@@ -1,0 +1,16 @@
+/**
+ * @author Codex
+ * @date 2026-11-06
+ * elect 构建配置：将 Electron 主进程源码编译到本包 dist，并输出源码映射。
+ */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "noEmitOnError": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "sourceMap": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.cts"]
+}

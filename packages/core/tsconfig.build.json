@@ -1,0 +1,17 @@
+/**
+ * @author Codex
+ * @date 2026-11-06
+ * core 构建配置：输出 JavaScript、类型声明及源码映射，供其他包消费。
+ */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "noEmitOnError": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*.ts"]
+}

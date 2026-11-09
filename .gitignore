@@ -1,0 +1,11 @@
+# @author Codex
+# @date 2026-11-06
+# 忽略依赖、编译产物、本地缓存和环境变量文件。
+node_modules/
+dist/
+.npm-cache/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+

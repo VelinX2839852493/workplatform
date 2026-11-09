@@ -1,0 +1,20 @@
+/**
+ * @author Codex
+ * @date 2026-11-06
+ * 共享 TypeScript 配置：统一 Node ESM 规则及严格检查，由各包继承并指定文件范围。
+ */
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true
+  }
+}

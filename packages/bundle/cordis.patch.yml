@@ -1,0 +1,7 @@
+# @author Codex
+# @date 2026-11-07
+# 将本地插件市场作为真实 Cordis 插件注册到桌面应用。
+- insert:
+    - id: plugin-market
+      name: '@workplatform/plugin-market'
+      required: true

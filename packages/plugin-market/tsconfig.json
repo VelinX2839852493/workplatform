@@ -1,0 +1,9 @@
+/**
+ * @author Codex
+ * @date 2026-11-07
+ * 插件市场类型配置：继承根目录规则，检查实现和生命周期测试。
+ */
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}
