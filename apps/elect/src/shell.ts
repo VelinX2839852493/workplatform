@@ -21,7 +21,7 @@ export default defineComponent({
     const panels = ref<HTMLElement>();
     const settingsDialog = ref<HTMLDialogElement>();
     const message = ref('');
-    const selected = ref('workspace');
+    const selected = ref('');
     const entries = shallowRef<SlotSnapshot['entries']>([]);
     const mounted = new Map<string, MountedPanel>();
     const drafts = new Map<string, PanelDraft>();
@@ -41,13 +41,26 @@ export default defineComponent({
       settingsDialog.value?.showModal();
     }
 
-    /** @returns 无返回值，按已注册页面切换路由，未知或已卸载页面回到工作台。 */
+    /** @returns 无返回值，初始、未知或已卸载路由切换到侧栏首个页面，无页面时清空路由。 */
     function updateRoute(): void {
       let key: string;
       try { key = decodeURIComponent(location.hash.slice(1)); }
       catch { key = ''; }
-      selected.value = mounted.has(key) ? key : 'workspace';
-      if (key && key !== selected.value) location.hash = '#workspace';
+      const firstPage = navigation.value[0];
+      let fallback = firstPage ? firstPage.id : '';
+      // 条件表达式等价于：firstPage 存在时取它的 id，否则先使用空字符串。
+      if (!fallback) {
+        for (const [id] of mounted) {
+          // 解构等价于从每一组 [页面标识, 挂载记录] 中只读取第一个值。
+          fallback = id;
+          break;
+        }
+      }
+      selected.value = mounted.has(key) ? key : fallback;
+      // Map.has 来自 JavaScript，传入页面标识并返回是否已挂载，例如 has('tools') 为 true 时保留工具页。
+      const hash = selected.value ? '#' + encodeURIComponent(selected.value) : '';
+      // encodeURIComponent 来自 JavaScript，接收页面标识并返回 URL 编码；例如“工具”返回“%E5%B7%A5%E5%85%B7”。
+      if (location.hash !== hash) location.hash = hash;
       for (const [id, panel] of mounted) panel.container.hidden = id !== selected.value;
     }
 

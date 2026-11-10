@@ -1,21 +1,38 @@
 /**
  * @author Codex
  * @date 2026-11-10
- * Skills 页面样式：技能列表与源码编辑器分栏，窄窗口自动切换为上下布局。
+ * Skills 页面样式：搜索栏、可选技能列表与源码编辑区统一分栏，窄窗口上下排列。
  */
-[data-panel="skills-manager"] .skills-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-[data-panel="skills-manager"] .skills-layout { display: grid; grid-template-columns: minmax(180px, 30%) minmax(0, 1fr); gap: 16px; }
+[data-panel="skills-manager"] .skills-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+[data-panel="skills-manager"] .skills-search { margin-bottom: 20px; }
+.skills-search input { width: 300px; }
+.skills-search label { color: var(--wp-muted); }
+[data-panel="skills-manager"] .skills-layout { display: grid; grid-template-columns: minmax(190px, 30%) minmax(0, 1fr); gap: 24px; align-items: start; }
+#skills-count { margin: 0 0 12px; color: var(--wp-muted); font-size: 12px; }
 #skill-list { list-style: none; margin: 0; padding: 0; max-height: 65vh; overflow: auto; }
-#skill-list li { margin-bottom: 8px; }
-#skill-list .skill-choice { display: block; width: 100%; text-align: left; overflow-wrap: anywhere; }
-#skill-list .skill-choice[aria-pressed="true"] { outline: 2px solid Highlight; outline-offset: -2px; }
-#skill-list .skill-choice strong, #skill-list .skill-choice span { display: block; margin: 4px 0; }
-[data-panel="skills-manager"] .skill-path { overflow-wrap: anywhere; }
-#skill-name { margin-top: 0; }
+#skill-list li { margin-bottom: 6px; }
+#skill-list .skill-choice { display: block; width: 100%; min-height: 106px; padding: 14px; border: 1px solid transparent; border-radius: 8px; background: transparent; text-align: left; overflow-wrap: anywhere; line-height: 1.6; }
+#skill-list .skill-choice:hover { background: #edf1f2; }
+#skill-list .skill-choice[aria-pressed="true"] { border-color: #b4cdbd; background: var(--wp-selected); }
+#skill-list .skill-choice strong, #skill-list .skill-choice span { display: block; }
+#skill-list .skill-choice strong { margin-bottom: 5px; color: var(--wp-ink); font-size: 14px; font-weight: 650; }
+#skill-list .skill-description { margin-bottom: 8px; font-size: 12px; color: #52645b; }
+#skill-list .skill-source { overflow: hidden; color: #5c7065; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.skill-editor-panel { min-width: 0; padding: 22px; border: 1px solid var(--wp-line); border-radius: 10px; background: var(--wp-surface); }
+#skill-empty { margin: 0; padding: 80px 12px; color: var(--wp-muted); text-align: center; font-size: 13px; }
+#skill-name { margin: 0 0 6px; font-size: 17px; }
+[data-panel="skills-manager"] .skill-path { margin-bottom: 20px; color: var(--wp-muted); font-size: 11px; overflow-wrap: anywhere; }
 #skills-message { white-space: pre-line; }
-#skill-content { display: block; box-sizing: border-box; width: 100%; min-height: 340px; height: 52vh; margin: 8px 0; font: 13px/1.5 Consolas, monospace; tab-size: 2; resize: vertical; }
-#skill-content:focus-visible, #skill-list .skill-choice:focus-visible { outline: 2px solid Highlight; }
+#skill-editor-form > label { color: var(--wp-muted); font-size: 12px; }
+#skill-content { display: block; width: 100%; min-height: 260px; height: 39vh; margin: 8px 0 18px; padding: 14px; border-color: #dce2e5; background: #fafbfc; font: 12px/1.85 Consolas, "Microsoft YaHei UI", monospace; tab-size: 2; resize: vertical; }
+#skill-dirty { margin-left: auto; font-size: 11px; }
+@media (max-width: 1000px) {
+  [data-panel="skills-manager"] .skills-layout { gap: 18px; }
+  .skill-editor-panel { padding: 18px; }
+}
 @media (max-width: 760px) {
   [data-panel="skills-manager"] .skills-layout { grid-template-columns: minmax(0, 1fr); }
   #skill-list { max-height: 200px; }
+  #skill-list .skill-choice { min-height: 0; }
+  #skill-content { height: 38vh; }
 }

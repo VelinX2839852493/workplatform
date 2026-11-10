@@ -20,15 +20,15 @@ async function quitApplication(): Promise<void> {
 }
 
 /**
- * 应用就绪后启动插件上下文，创建唯一窗口并加载本地工作台。
+ * 应用就绪后启动插件上下文，创建较大的桌面窗口并加载本地插件宿主。
  * @returns 页面加载完成时兑现的 Promise。
  */
 async function createMainWindow(): Promise<void> {
   const patchPath = fileURLToPath(new URL('./cordis.patch.yml', import.meta.resolve('@workplatform/bundle/package.json')));
   appContext = await boot(app.getName(), patchPath);
   const mainWindow = new BrowserWindow({
-    width: 960,
-    height: 640,
+    width: 1280,
+    height: 800,
     minWidth: 600,
     minHeight: 440,
     title: 'Workplatform',

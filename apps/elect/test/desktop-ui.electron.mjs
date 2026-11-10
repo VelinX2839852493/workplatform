@@ -57,17 +57,20 @@ async function run() {
   assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#plugin-navigation a'), link => link.textContent)"), ['插件市场', 'Skills 管理', '工具']);
   checks.push('双目录列表及插件注册导航');
 
-  assert.equal(await evaluate("document.querySelector('#workspace').hidden"), false);
+  assert.equal(await evaluate("document.querySelector('#workspace')"), null);
+  await waitFor("location.hash === '#plugin-market' && document.querySelector('[data-panel=plugin-market]')?.hidden === false");
+  assert.equal(await evaluate("document.querySelector('nav a[href=\"#workspace\"]')"), null);
+  await evaluate("location.hash = '#missing-page'");
+  await waitFor("location.hash === '#plugin-market'");
   await evaluate("document.querySelector('.sidebar-footer button').click()");
   assert.equal(await evaluate("document.querySelector('#settings-dialog').open"), true);
   await evaluate("document.querySelector('#settings-dialog button').click()");
   assert.equal(await evaluate("document.querySelector('#settings-dialog').open"), false);
-  checks.push('Vue 宿主默认工作台及原生设置对话框');
+  checks.push('无工作台首页、默认插件路由、未知路由回退及原生设置对话框');
 
   await evaluate("location.hash = '#tools'");
   await waitFor("document.querySelector('#tool-form fieldset')?.disabled === false");
   assert.equal(await evaluate("document.querySelector('#plugin-navigation [aria-current=page]').hash"), '#tools');
-  assert.equal(await evaluate("document.querySelector('#workspace').hidden"), true);
   assert.equal(await evaluate('document.adoptedStyleSheets.length'), 2);
   await evaluate(`document.querySelector('#tool-form [name=name]').value = '开发文档'; document.querySelector('#tool-form [name=name]').dispatchEvent(new Event('input', { bubbles: true }));
     document.querySelector('#tool-form [name=url]').value = 'https://example.com/docs'; document.querySelector('#tool-form [name=url]').dispatchEvent(new Event('input', { bubbles: true }));
@@ -125,7 +128,7 @@ async function run() {
   await waitFor("document.querySelector('[data-panel=example]')?.hidden === false");
   removeSidebar();
   removeMain();
-  await waitFor("!document.querySelector('[data-panel=example]') && location.hash === '#workspace'");
+  await waitFor("!document.querySelector('[data-panel=example]') && location.hash === '#plugin-market'");
   checks.push('新插件动态注册、排序、路由及撤销，无需改宿主');
 
   await evaluate("location.hash = '#skills-manager'; document.querySelector('#skill-list button').click()");
@@ -141,7 +144,7 @@ async function run() {
   checks.push('切换技能和重新读取的未保存保护');
 
   await context.pluginRuntime.close('skills-manager');
-  await waitFor("!document.querySelector('[data-panel=skills-manager]') && location.hash === '#workspace'");
+  await waitFor("!document.querySelector('[data-panel=skills-manager]') && location.hash === '#plugin-market'");
   await assert.rejects(context.slots.invoke('skills-manager:list', []), /未注册或已卸载/);
   await context.pluginRuntime.load('skills-manager');
   await waitFor("document.querySelector('#skill-content')?.value.includes('Draft retained') && document.querySelectorAll('#skill-list button').length === 2");
@@ -191,11 +194,19 @@ async function run() {
   checks.push('拒绝其他窗口的桥接请求');
 
   await evaluate("location.hash = '#plugin-market'; document.querySelector('[aria-label=\"关闭 @workplatform/plugin-market\"]').click()");
-  await waitFor("!document.querySelector('[data-panel=plugin-market]') && location.hash === '#workspace'");
+  await waitFor("!document.querySelector('[data-panel=plugin-market]') && location.hash === '#skills-manager'");
   assert.ok(await evaluate("document.querySelector('#skill-content').value.includes('Conflicting draft')"));
   await context.pluginRuntime.load('plugin-market');
   await waitFor("document.querySelector('[data-panel=plugin-market]') && document.querySelectorAll('#plugin-navigation a').length === 3");
   checks.push('市场自关闭及重载不影响 Skills 草稿');
+
+  await context.pluginRuntime.close('plugin-market');
+  await context.pluginRuntime.close('skills-manager');
+  await toolsFiber.dispose();
+  await waitFor("document.querySelectorAll('#plugin-navigation a').length === 0 && location.hash === '' && document.querySelector('.empty-state')?.textContent === '暂无已启用的页面。'");
+  await context.pluginRuntime.load('skills-manager');
+  await waitFor("location.hash === '#skills-manager' && document.querySelector('[data-panel=skills-manager]')?.hidden === false && document.querySelector('#skill-content')?.value.includes('Conflicting draft')");
+  checks.push('全部页面卸载后的空状态及重新注册后自动进入');
 
   let prevented = false;
   window.webContents.on('will-prevent-unload', () => { prevented = true; });

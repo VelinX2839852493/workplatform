@@ -1,12 +1,16 @@
 # @workplatform/elect
 
-Electron 单窗口宿主，默认 960 × 640，左侧工作台和底部设置入口使用原生控件。
+Electron 单窗口宿主，默认 1280 × 800，使用浅色主题、深绿色选中态和统一的原生表单控件样式。
 设置为原生 dialog，支持关闭按钮、Esc 和遮罩关闭；目前没有具体设置项。
+
+`styles.css` 持有共享配色变量、导航、按钮、表单、表格和对话框样式；业务插件保留各自的布局 CSS。
+启动直接进入侧栏首个插件页面，不提供独立工作台首页。600px 及以下宽度改为顶部导航，
+Skills 在窄窗口上下排列，主内容区独立滚动并预留滚动条宽度，页面切换时保持对齐。
 
 宿主仅持有 Cordis Context 和通用 slots 注册表：
 
 - `index.html` 只提供 Vue 挂载点，`src/renderer.ts` 挂载宿主组件。
-- `src/Shell.vue` 声明工作台、设置、导航和插件容器模板；通过外置 `script src` 引用 `src/shell.ts`。
+- `src/Shell.vue` 声明设置、导航和插件容器模板；通过外置 `script src` 引用 `src/shell.ts`。
 - `src/shell.ts` 订阅注册表，消费 `sidebar.panellist` 生成导航，按 `main` 加载客户端模块。
 - `src/desktop-ui-ipc.ts` 校验主页面请求，桥接快照和已注册的方法；窗口关闭时撤销桥接。
 - `src/preload.cts` 暴露有限的 `window.desktopUi`，不暴露 Node.js 或任意 IPC 通道。
@@ -15,7 +19,8 @@ Electron 单窗口宿主，默认 960 × 640，左侧工作台和底部设置入
 业务插件自己的 `apply` 注册导航、面板模块和请求，卸载时由 effect 撤销。
 客户端模块收到容器和请求接口，返回 dispose 与可选的 snapshot。
 在页面之间切换保留实例；插件卸载时暂存草稿数据并释放实例，重载后把草稿重新注入。
-删除当前页面的注册时自动回到工作台。新增业务插件无需编辑宿主 HTML、渲染器或 preload。
+初始路由、未知路由及当前页面被卸载时，自动选择按侧栏顺序排列的第一个页面；
+全部页面卸载后显示空状态，重新注册页面后自动进入。新增业务插件无需编辑宿主 HTML、渲染器或 preload。
 
 默认 bundle 加载插件市场、Skills 管理和工具，页面、业务代码和样式由各自包持有。
 工具支持网址增删改查、分类筛选和系统浏览器跳转，保存到根目录 `config/tool/tools.json`。
