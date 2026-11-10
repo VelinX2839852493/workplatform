@@ -1,0 +1,26 @@
+# @author Codex
+# @date 2026-11-09
+# 将 Electron 宿主与生产依赖打入 ASAR，输出 Windows x64 应用目录及 NSIS 安装包。
+appId: com.workplatform.desktop
+productName: Workplatform
+directories:
+  app: apps/elect
+  output: release
+asar: true
+allowMissingDependencies: false
+files:
+  - dist/**/*.js
+  - dist/**/*.cjs
+  - index.html
+  - styles.css
+  - '!node_modules/@workplatform/*/src/**'
+  - '!node_modules/@workplatform/*/tsconfig*.json'
+  - '!**/*.map'
+win:
+  target: nsis
+  artifactName: '${productName}-${version}-${arch}-setup.${ext}'
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  runAfterFinish: false

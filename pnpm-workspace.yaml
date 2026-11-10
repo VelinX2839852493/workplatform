@@ -9,4 +9,6 @@ packages:
 nodeLinker: hoisted
 
 allowBuilds:
+  # 使用 NSIS，无需执行 Squirrel 安装器的 7z 选择脚本。
+  electron-winstaller: false
   esbuild: true

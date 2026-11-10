@@ -16,13 +16,33 @@ Electron 单窗口宿主，默认 960 × 640，左侧工作台和底部设置入
 在页面之间切换保留实例；插件卸载时暂存草稿数据并释放实例，重载后把草稿重新注入。
 删除当前页面的注册时自动回到工作台。新增业务插件无需编辑宿主 HTML、渲染器或 preload。
 
-默认 bundle 加载插件市场和 Skills 管理，两者的页面、业务代码和样式由各自包持有。
+默认 bundle 加载插件市场、Skills 管理和工具，页面、业务代码和样式由各自包持有。
+工具支持网址增删改查、分类筛选和系统浏览器跳转，保存到根目录 `config/tool/tools.json`。
 Skills 页面支持完整 SKILL.md 编辑、手动刷新、未保存提示、冲突保护及窄窗口上下布局。
 插件开关只影响当前运行，重启按 YAML 恢复。市场自关闭后，当前界面无入口重新加载市场。
 
 在根目录运行 `pnpm run dev` 构建并启动；修改源码后关闭窗口并重新运行。
-构建顺序是 ui-slots、core、app-boot、plugin-market、skills-manager、elect。
+构建顺序是 ui-slots、core、app-boot、plugin-market、skills-manager、tools、elect。
 `pnpm run check` 包含类型检查、所有包测试及构建。
+
+## Windows 打包
+
+在 Windows x64 环境的项目根目录执行：
+
+- `pnpm run pack`：先构建，再生成 `release/win-unpacked/Workplatform.exe` 及运行所需文件。
+- `pnpm run dist`：先构建，再生成 `release/Workplatform-0.1.0-x64-setup.exe` NSIS 安装包。
+
+`win-unpacked` 必须作为完整目录分发；安装包支持选择安装目录，默认按当前用户安装，完成后不自动启动。
+产物名称中的版本取本包 package.json。打包命令均禁止自动发布，产物保留在被 Git 忽略的 release 目录。
+当前未配置代码签名证书，生成的 Windows 产物未签名，使用 Electron 默认图标。
+首次打包需要联网下载 Electron 及 Windows 打包工具。
+
+根目录 `electron-builder.yml` 以本包为应用目录，将主进程、preload、渲染器、HTML、CSS
+和生产依赖收录到 ASAR。宿主显式依赖 `@workplatform/bundle`，其 YAML 和插件依赖随应用分发。
+启动通过包解析定位配置，不要求工作目录指向源码仓库；插件客户端也从包内加载。
+
+配置参考 [electron-builder 应用内容](https://www.electron.build/v26/docs/contents/)
+及 [NSIS 配置](https://www.electron.build/v26/docs/nsis/)。
 
 `test/desktop-ui.electron.mjs` 使用真实 Electron preload、IPC、宿主和插件模块，在隐藏窗口
 验收动态插件注入、排序、卸载/重载、草稿恢复、保存/冲突、参数与窗口校验和关闭保护。

@@ -132,8 +132,32 @@ async function verifiesMissingPlugin(t: TestContext): Promise<void> {
   await assert.rejects(boot('Test'), /Cannot find module/);
 }
 
+/**
+ * 验证显式配置脱离工作目录后仍能解析插件，且缺失的显式配置不会静默空启动。
+ * @param t 当前测试上下文。
+ * @returns 配置路径和插件加载断言完成时兑现的 Promise。
+ */
+async function verifiesExplicitConfiguration(t: TestContext): Promise<void> {
+  const bundle = createWorkspace(t);
+  writeTemporaryPlugin(bundle, 'test-packaged', 'ctx.root.provide("packagedPlugin", true);');
+  const patchPath = join(bundle, 'cordis.patch.yml');
+  writeFileSync(patchPath, '- insert:\n    - id: packaged\n      name: test-packaged\n');
+  process.chdir(tmpdir());
+  const ctx = await boot('PackagedTest', patchPath);
+  t.after(function disposeContext(): Promise<void> {
+    // 释放临时插件上下文；无入参，返回释放完成时兑现的 Promise。
+    return ctx.fiber.dispose();
+  });
+  assert.equal(ctx.get('packagedPlugin'), true);
+  assert.equal(ctx.pluginRuntime.list()[0]?.state, 'loaded');
+  await assert.rejects(boot('PackagedTest', join(bundle, 'missing.yml')), /ENOENT/);
+  writeFileSync(patchPath, '[unterminated');
+  await assert.rejects(boot('PackagedTest', patchPath));
+}
+
 test('preserves insert and plugin order', verifiesPatchOrder);
 test('propagates file and YAML errors', verifiesConfigurationErrors);
 test('boots without plugins or configuration', verifiesEmptyBoot);
 test('resolves bundle-local plugins and registers them sequentially', verifiesBundleResolution);
 test('rejects an unresolved plugin', verifiesMissingPlugin);
+test('loads an explicit configuration independently of cwd and propagates configuration errors', verifiesExplicitConfiguration);

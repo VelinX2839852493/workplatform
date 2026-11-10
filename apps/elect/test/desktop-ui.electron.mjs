@@ -8,8 +8,9 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 import boot from '@workplatform/app-boot';
+import toolsPlugin from '../../../packages/tools/dist/index.js';
 import { registerDesktopUiIpc } from '../dist/desktop-ui-ipc.js';
 
 const directory = process.argv[2];
@@ -43,22 +44,71 @@ async function run() {
   await writeFile(join(agents, 'SKILL.md'), source.replace('alpha-demo', 'beta-demo'));
   await app.whenReady();
   context = await boot('ElectronTest');
+  // 工具配置与 Skills 一样使用测试临时目录，不触碰项目中的真实收藏。
+  await context.pluginRuntime.close('tools');
+  let toolsFiber = await context.plugin(toolsPlugin, { directory: join(directory, 'config/tool') });
   window = new BrowserWindow({ show: false, width: 960, height: 640, webPreferences: {
     offscreen: true, backgroundThrottling: false,
     preload: fileURLToPath(new URL('../dist/preload.cjs', import.meta.url))
   } });
   registerDesktopUiIpc(window, context);
   await window.loadFile(fileURLToPath(new URL('../index.html', import.meta.url)));
-  await waitFor("document.querySelectorAll('#plugin-navigation a').length === 2 && document.querySelectorAll('#skill-list button').length === 2");
-  assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#plugin-navigation a'), link => link.textContent)"), ['插件市场', 'Skills 管理']);
+  await waitFor("document.querySelectorAll('#plugin-navigation a').length === 3 && document.querySelectorAll('#skill-list button').length === 2");
+  assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#plugin-navigation a'), link => link.textContent)"), ['插件市场', 'Skills 管理', '工具']);
   checks.push('双目录列表及插件注册导航');
+
+  await evaluate("location.hash = '#tools'");
+  await waitFor("document.querySelector('#tool-form fieldset')?.disabled === false");
+  await evaluate(`document.querySelector('#tool-form [name=name]').value = '开发文档';
+    document.querySelector('#tool-form [name=url]').value = 'https://example.com/docs';
+    document.querySelector('#tool-form [name=category]').value = '开发';
+    document.querySelector('#tool-form').requestSubmit()`);
+  await waitFor("document.querySelector('#tool-list a')?.textContent === '开发文档'");
+  assert.equal(JSON.parse(await readFile(join(directory, 'config/tool/tools.json'), 'utf8'))[0].category, '开发');
+  await evaluate(`document.querySelector('#tool-form [name=name]').value = '参考资料';
+    document.querySelector('#tool-form [name=url]').value = 'https://example.org';
+    document.querySelector('#tool-form [name=category]').value = '参考';
+    document.querySelector('#tool-form').requestSubmit()`);
+  await waitFor("document.querySelectorAll('#tool-list a').length === 2");
+  await evaluate("document.querySelector('#tool-filter').value = '开发'; document.querySelector('#tool-filter').dispatchEvent(new Event('change'))");
+  assert.equal(await evaluate("document.querySelectorAll('#tool-list a').length"), 1);
+  assert.equal(await evaluate("document.querySelector('#tool-list a').textContent"), '开发文档');
+  let opened;
+  const originalOpen = shell.openExternal;
+  // 验证实际插件的浏览器调用参数，但不启动用户浏览器；@param address 网页地址。@returns 已完成 Promise。
+  shell.openExternal = async address => { opened = address; };
+  try {
+    await evaluate("document.querySelector('#tool-list a').click()");
+    const deadline = Date.now() + 3000;
+    while (!opened && Date.now() < deadline) await delay(25);
+    assert.equal(opened, 'https://example.com/docs');
+    assert.equal(BrowserWindow.getAllWindows().length, 1);
+  } finally { shell.openExternal = originalOpen; }
+  await evaluate(`document.querySelector('#tool-list [data-action="编辑"]').click();
+    document.querySelector('#tool-form [name=name]').value = '文档已更新';
+    document.querySelector('#tool-form [name=url]').value = 'https://example.net/new';
+    document.querySelector('#tool-form [name=category]').value = '参考';
+    document.querySelector('#tool-form').requestSubmit()`);
+  await waitFor("document.querySelector('#tool-list a')?.textContent === '文档已更新'");
+  assert.equal(await evaluate("document.querySelector('#tool-filter').value"), '');
+  await toolsFiber.dispose();
+  await waitFor("!document.querySelector('[data-panel=tools]')");
+  toolsFiber = await context.plugin(toolsPlugin, { directory: join(directory, 'config/tool') });
+  await waitFor("document.querySelectorAll('#tool-list a').length === 2");
+  assert.equal(await evaluate("document.querySelector('#tool-list a').href"), 'https://example.net/new');
+  await evaluate("window.confirm = () => false; document.querySelector('#tool-list [data-action=删除]').click()");
+  assert.equal(await evaluate("document.querySelectorAll('#tool-list a').length"), 2);
+  await evaluate("window.confirm = () => true; document.querySelector('#tool-list [data-action=删除]').click()");
+  await waitFor("document.querySelectorAll('#tool-list a').length === 1");
+  assert.equal(JSON.parse(await readFile(join(directory, 'config/tool/tools.json'), 'utf8')).length, 1);
+  checks.push('工具新增、分类筛选、名字跳转、修改、重载持久化及删除确认');
 
   const example = join(directory, 'example.mjs');
   await writeFile(example, '/** @author Codex @date 2026-11-09 测试插件页面。 */\nexport default { mount(container) { container.textContent = "动态注入成功"; return { dispose() {} }; } };');
   const removeMain = context.slots.register({ name: 'main', key: 'example', entry: pathToFileURL(example).href });
   const removeSidebar = context.slots.register({ name: 'sidebar.panellist', id: 'example', label: '动态示例', order: 15 });
   await waitFor("document.querySelector('[data-panel=example]')?.textContent === '动态注入成功'");
-  assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#plugin-navigation a'), link => link.textContent)"), ['插件市场', '动态示例', 'Skills 管理']);
+  assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#plugin-navigation a'), link => link.textContent)"), ['插件市场', '动态示例', 'Skills 管理', '工具']);
   await evaluate("location.hash = '#example'");
   await waitFor("document.querySelector('[data-panel=example]')?.hidden === false");
   removeSidebar();
@@ -128,7 +178,7 @@ async function run() {
   await waitFor("!document.querySelector('[data-panel=plugin-market]') && location.hash === '#workspace'");
   assert.ok(await evaluate("document.querySelector('#skill-content').value.includes('Conflicting draft')"));
   await context.pluginRuntime.load('plugin-market');
-  await waitFor("document.querySelector('[data-panel=plugin-market]') && document.querySelectorAll('#plugin-navigation a').length === 2");
+  await waitFor("document.querySelector('[data-panel=plugin-market]') && document.querySelectorAll('#plugin-navigation a').length === 3");
   checks.push('市场自关闭及重载不影响 Skills 草稿');
 
   let prevented = false;

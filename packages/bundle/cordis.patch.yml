@@ -8,3 +8,6 @@
     - id: skills-manager
       name: '@workplatform/skills-manager'
       required: true
+    - id: tools
+      name: '@workplatform/tools'
+      required: true

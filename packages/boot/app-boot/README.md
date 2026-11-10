@@ -1,7 +1,8 @@
 # @workplatform/app-boot
 
-应用启动包，默认导出 `boot(appName: string): Promise<Context>`。
-读取进程工作目录下 `packages/bundle/cordis.patch.yml`，以 bundle/package.json 为模块解析起点，
+应用启动包，默认导出 `boot(appName: string, patchPath?: string): Promise<Context>`。
+可显式传入插件补丁绝对路径；省略时读取进程工作目录下 `packages/bundle/cordis.patch.yml`。
+以补丁同目录的 bundle/package.json 为模块解析起点，
 创建通用插件运行时并顺序加载每个插件的默认导出，不直接依赖或注册插件市场。
 运行时通过返回 Context 的 `pluginRuntime` 服务提供加载、关闭及状态查询。
 同时提供通用 `slots` 注册表供插件注册侧栏、主面板和有限请求；不在启动内核枚举业务入口。
@@ -37,7 +38,8 @@ pnpm run build
 
 `readDesktopPlugins(path)` 直接读取并解析 YAML，通过 flatMap 按顺序展开各段 insert。
 `id` 与 `required` 保留为配置元数据；当前流程注册所有条目，仅使用 name 解析模块。
-没有配置文件时 boot 返回空 Context；显式读取缺失文件、YAML 语法错误和模块加载错误均抛出。
+省略路径且默认配置不存在时 boot 返回空 Context；显式路径缺失、YAML 语法错误和模块加载错误均抛出。
+Electron 宿主从 `@workplatform/bundle` 解析补丁绝对路径，开发和打包启动均不依赖进程工作目录。
 appName 用于启动日志命名，当前不按应用名称筛选插件。
 没有业务插件条目时，仅有通用运行时和 slots 注册表，不会提供 pluginMarket 或 skillsManager 服务。
 

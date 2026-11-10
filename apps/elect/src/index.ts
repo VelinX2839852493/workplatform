@@ -24,7 +24,8 @@ async function quitApplication(): Promise<void> {
  * @returns 页面加载完成时兑现的 Promise。
  */
 async function createMainWindow(): Promise<void> {
-  appContext = await boot(app.getName());
+  const patchPath = fileURLToPath(new URL('./cordis.patch.yml', import.meta.resolve('@workplatform/bundle/package.json')));
+  appContext = await boot(app.getName(), patchPath);
   const mainWindow = new BrowserWindow({
     width: 960,
     height: 640,

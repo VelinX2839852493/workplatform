@@ -5,6 +5,7 @@
   "description": "桌面插件装配包，声明可解析的插件依赖及启动补丁",
   "dependencies": {
     "@workplatform/plugin-market": "workspace:*",
-    "@workplatform/skills-manager": "workspace:*"
+    "@workplatform/skills-manager": "workspace:*",
+    "@workplatform/tools": "workspace:*"
   }
 }

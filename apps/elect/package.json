@@ -8,6 +8,7 @@
   "scripts": { "test": "tsc -p tsconfig.build.json && tsx --test test/*.test.ts" },
   "dependencies": {
     "@workplatform/app-boot": "workspace:*",
+    "@workplatform/bundle": "workspace:*",
     "@workplatform/ui-slots": "workspace:*"
   }
 }

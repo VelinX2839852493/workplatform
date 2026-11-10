@@ -20,6 +20,8 @@ pnpm run dev
 | `pnpm test` | 执行有 test 脚本的工作区包的测试 |
 | `pnpm run build` | 在根目录依次构建 ui-slots、core、app-boot、plugin-market、skills-manager、elect，输出到各包 dist |
 | `pnpm start` | 先统一构建所有包，再通过 Electron 打开窗口 |
+| `pnpm run pack` | 构建并生成 Windows x64 应用目录 release/win-unpacked |
+| `pnpm run dist` | 构建并生成 Windows x64 NSIS 安装包到 release |
 | `pnpm run check` | 依次执行类型检查、测试、构建 |
 
 ## 目录与配置
@@ -36,6 +38,7 @@ pnpm run dev
 - 各包的 `tsconfig.json`：本包类型检查范围。
 - 各包的 `tsconfig.build.json`：本包构建范围、产物目录及输出选项。
 - 根目录 `package.json`：统一开发依赖、工作区、构建、类型检查、开发与启动命令。
+- 根目录 `electron-builder.yml`：Electron 应用目录、生产文件及 Windows NSIS 安装包配置。
 - 各包 `package.json`：独立声明包信息、业务依赖、公共入口及相关测试脚本。
 - `pnpm-workspace.yaml`：注册工作区，配置 Electron 使用的 hoisted 布局，并只允许 esbuild 安装脚本执行。
 - `pnpm-lock.yaml`：pnpm 自动生成的依赖锁文件，不手工修改。

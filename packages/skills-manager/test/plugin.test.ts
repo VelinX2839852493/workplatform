@@ -32,7 +32,7 @@ test('provides its own service, disposes stale references and can be reloaded', 
   assert.notEqual(ctx.skillsManager, service);
 });
 
-test('the real bundle boots both plugins and reloads Skills independently of the market', async (t) => {
+test('the real bundle boots all plugins and reloads Skills independently of the market', async (t) => {
   // pnpm 的测试工作目录为包根；真实 boot 固定从工作区根解析 bundle 配置。
   const previous = process.cwd();
   process.chdir(fileURLToPath(new URL('../../../', import.meta.url)));
@@ -41,7 +41,7 @@ test('the real bundle boots both plugins and reloads Skills independently of the
   t.after(() => ctx.fiber.dispose());
   assert.equal(ctx.pluginRuntime.list().find(plugin => plugin.id === 'skills-manager')!.state, 'loaded');
   assert.ok(ctx.get('skillsManager'));
-  assert.deepEqual(ctx.slots.snapshot().entries.filter(entry => entry.name === 'sidebar.panellist').map(entry => entry.id), ['plugin-market', 'skills-manager']);
+  assert.deepEqual(ctx.slots.snapshot().entries.filter(entry => entry.name === 'sidebar.panellist').map(entry => entry.id), ['plugin-market', 'skills-manager', 'tools']);
   await ctx.pluginRuntime.close('skills-manager');
   assert.equal(ctx.get('skillsManager'), undefined);
   assert.ok(ctx.slots.snapshot().entries.every(entry => entry.name === 'main' ? entry.key !== 'skills-manager' : entry.id !== 'skills-manager'));
@@ -50,5 +50,5 @@ test('the real bundle boots both plugins and reloads Skills independently of the
   assert.ok(ctx.get('skillsManager'));
   await ctx.pluginRuntime.close('plugin-market');
   assert.ok(ctx.get('skillsManager'));
-  assert.deepEqual(ctx.slots.snapshot().entries.filter(entry => entry.name === 'sidebar.panellist').map(entry => entry.id), ['skills-manager']);
+  assert.deepEqual(ctx.slots.snapshot().entries.filter(entry => entry.name === 'sidebar.panellist').map(entry => entry.id), ['tools', 'skills-manager']);
 });

@@ -1,0 +1,17 @@
+/**
+ * @author Codex
+ * @date 2026-11-09
+ * 工具插件构建配置：仅输出源码及类型声明。
+ */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "noEmitOnError": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*.ts"]
+}

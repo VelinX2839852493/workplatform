@@ -1,0 +1,15 @@
+{
+  "name": "@workplatform/tools",
+  "version": "0.1.0",
+  "private": true,
+  "description": "持久化的分类工具网址插件",
+  "type": "module",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "development": "./src/index.ts", "default": "./dist/index.js" }
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "^4.0.5",
+    "@workplatform/ui-slots": "workspace:*"
+  },
+  "scripts": { "test": "tsx --test test/*.test.ts" }
+}
