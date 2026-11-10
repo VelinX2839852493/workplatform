@@ -1,0 +1,12 @@
+/**
+ * @author Codex
+ * @date 2026-11-10
+ * 工具页面布局：表单自动换行，工具列表保持原生控件与可换行的网址。
+ */
+#tool-form fieldset { display:flex; flex-wrap:wrap; align-items:end; gap:12px; margin:0; }
+#tool-form label { display:grid; gap:4px; flex:1 1 140px; min-width:0; }
+#tool-form input { box-sizing:border-box; width:100%; }
+#tool-list { padding:0; list-style:none; }
+#tool-list li { display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #ddd; }
+#tool-list a { flex:1 1 120px; overflow-wrap:anywhere; }
+#tool-list span { color:#555; }

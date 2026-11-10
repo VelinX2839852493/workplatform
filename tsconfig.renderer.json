@@ -1,0 +1,23 @@
+/**
+ * @author Codex
+ * @date 2026-11-10
+ * Vue 渲染端类型配置：用 Bundler 解析模板、外置 TS 和 CSS，Node.js 配置保持独立。
+ */
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2023", "DOM"],
+    "types": ["node", "vite/client"]
+  },
+  "vueCompilerOptions": { "strictTemplates": true, "dataAttributes": ["data-*"] },
+  "include": [
+    "apps/elect/src/renderer.ts",
+    "apps/elect/src/shell.ts",
+    "apps/elect/src/**/*.vue",
+    "packages/*/src/client.ts",
+    "packages/*/src/view.ts",
+    "packages/*/src/**/*.vue"
+  ]
+}

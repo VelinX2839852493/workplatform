@@ -1,5 +1,9 @@
 # Skills 管理插件
 
+界面模板位于 `src/View.vue`，搜索、编辑和保存逻辑位于外置脚本 `src/view.ts`，
+布局位于 `src/view.css`。`src/client.ts` 适配 Vue 挂载、草稿快照和卸载；
+构建后继续以 `dist/client.js` 动态加载，插件重载仍恢复文件版本、编辑草稿和搜索条件。
+
 `@workplatform/skills-manager` 是由 bundle 加载的 Cordis 插件。启用时提供
 `ctx.skillsManager`，卸载时移除服务并停止文件操作，不依赖 Electron。
 

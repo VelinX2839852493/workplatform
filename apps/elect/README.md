@@ -5,8 +5,9 @@ Electron 单窗口宿主，默认 960 × 640，左侧工作台和底部设置入
 
 宿主仅持有 Cordis Context 和通用 slots 注册表：
 
-- `index.html` 只声明工作台、设置、导航容器和面板容器，不包含业务入口和页面。
-- `src/renderer.ts` 订阅注册表，消费 `sidebar.panellist` 生成导航，按 `main` 加载客户端模块。
+- `index.html` 只提供 Vue 挂载点，`src/renderer.ts` 挂载宿主组件。
+- `src/Shell.vue` 声明工作台、设置、导航和插件容器模板；通过外置 `script src` 引用 `src/shell.ts`。
+- `src/shell.ts` 订阅注册表，消费 `sidebar.panellist` 生成导航，按 `main` 加载客户端模块。
 - `src/desktop-ui-ipc.ts` 校验主页面请求，桥接快照和已注册的方法；窗口关闭时撤销桥接。
 - `src/preload.cts` 暴露有限的 `window.desktopUi`，不暴露 Node.js 或任意 IPC 通道。
 - `src/index.ts` 启动应用和通用桥接，统一处理未保存草稿的关闭确认。
@@ -24,6 +25,18 @@ Skills 页面支持完整 SKILL.md 编辑、手动刷新、未保存提示、冲
 在根目录运行 `pnpm run dev` 构建并启动；修改源码后关闭窗口并重新运行。
 构建顺序是 ui-slots、core、app-boot、plugin-market、skills-manager、tools、elect。
 `pnpm run check` 包含类型检查、所有包测试及构建。
+
+界面使用 Vue 3，HTML 模板、TypeScript 逻辑和 CSS 分别存放；三个业务插件使用相同结构。
+`scripts/build-ui.mjs` 使用 Vite 和官方 Vue 插件预编译模板，分别生成宿主 `dist/renderer.js`
+与各插件 `dist/client.js`，浏览器直接加载，不依赖开发服务器或运行时模板编译。
+每个面板独立挂载 Vue 应用，继续实现通用 `PanelModule` 接口；卸载释放组件和插件样式。
+渲染端通过根目录 `tsconfig.renderer.json` 开启严格模板检查，Node.js 端仍使用原有配置。
+现有 TypeScript 7 用于 Node.js 构建；`typescript-vue` 别名固定 TypeScript 6，
+由 `scripts/typecheck-ui.cjs` 运行需要编译器 API 的 vue-tsc，避免更换项目主编译器。
+可单独运行 `pnpm run build:ui` 构建界面；编辑器推荐使用 Vue - Official 扩展。
+
+外置脚本规则参考 [Vue SFC src 引用](https://vuejs.org/api/sfc-spec.html#src-imports)，
+模板检查参考 [Vue TypeScript 工具说明](https://vuejs.org/guide/typescript/overview.html)。
 
 ## Windows 打包
 

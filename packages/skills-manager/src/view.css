@@ -1,0 +1,21 @@
+/**
+ * @author Codex
+ * @date 2026-11-10
+ * Skills 页面样式：技能列表与源码编辑器分栏，窄窗口自动切换为上下布局。
+ */
+[data-panel="skills-manager"] .skills-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+[data-panel="skills-manager"] .skills-layout { display: grid; grid-template-columns: minmax(180px, 30%) minmax(0, 1fr); gap: 16px; }
+#skill-list { list-style: none; margin: 0; padding: 0; max-height: 65vh; overflow: auto; }
+#skill-list li { margin-bottom: 8px; }
+#skill-list .skill-choice { display: block; width: 100%; text-align: left; overflow-wrap: anywhere; }
+#skill-list .skill-choice[aria-pressed="true"] { outline: 2px solid Highlight; outline-offset: -2px; }
+#skill-list .skill-choice strong, #skill-list .skill-choice span { display: block; margin: 4px 0; }
+[data-panel="skills-manager"] .skill-path { overflow-wrap: anywhere; }
+#skill-name { margin-top: 0; }
+#skills-message { white-space: pre-line; }
+#skill-content { display: block; box-sizing: border-box; width: 100%; min-height: 340px; height: 52vh; margin: 8px 0; font: 13px/1.5 Consolas, monospace; tab-size: 2; resize: vertical; }
+#skill-content:focus-visible, #skill-list .skill-choice:focus-visible { outline: 2px solid Highlight; }
+@media (max-width: 760px) {
+  [data-panel="skills-manager"] .skills-layout { grid-template-columns: minmax(0, 1fr); }
+  #skill-list { max-height: 200px; }
+}

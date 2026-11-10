@@ -1,5 +1,9 @@
 # @workplatform/plugin-market
 
+界面模板位于 `src/View.vue`，列表查询与插件启停逻辑位于外置脚本 `src/view.ts`。
+`src/client.ts` 只负责 Vue 面板挂载与卸载；构建后仍输出本包 `dist/client.js`，
+保持通用插件模块契约，并在卸载时停止更新页面状态。
+
 真正的 Cordis 插件，默认导出包含 inject 和 apply 的插件对象。
 由 `packages/bundle/cordis.patch.yml` 配置加载，app-boot 没有直接依赖或创建市场服务。
 插件依赖通用 `pluginRuntime` 和 `slots` 服务，启用时在自己的 Fiber 上提供 `pluginMarket`，卸载时由 Cordis 自动移除。

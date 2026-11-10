@@ -1,10 +1,11 @@
 /**
  * @author Codex
  * @date 2026-11-09
- * 工具插件类型配置：检查文件存储、原生 DOM 页面和测试。
+ * 工具插件类型配置：检查文件存储和测试，Vue 页面由根目录渲染端配置检查。
  */
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "lib": ["ES2023", "DOM"] },
-  "include": ["src/**/*.ts", "test/**/*.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts"],
+  "exclude": ["src/client.ts", "src/view.ts"]
 }

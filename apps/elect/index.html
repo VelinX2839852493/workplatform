@@ -2,7 +2,7 @@
 <!--
   @author Codex
   @date 2026-11-07
-  Electron 工作台：左侧栏提供工作台和底部设置入口，使用原生 dialog 打开模态设置面板。
+  Electron 文档入口：提供 Vue 挂载点，界面模板由 src/Shell.vue 持有。
 -->
 <html lang="zh-CN">
   <head>
@@ -14,28 +14,6 @@
     <script type="module" src="./dist/renderer.js"></script>
   </head>
   <body>
-    <aside aria-label="主侧栏">
-      <p>Workplatform</p>
-      <nav aria-label="主导航">
-        <a href="#workspace" aria-current="page">工作台</a>
-        <div id="plugin-navigation"></div>
-      </nav>
-      <div class="sidebar-footer">
-        <button type="button" commandfor="settings-dialog" command="show-modal" aria-haspopup="dialog">设置</button>
-        <!-- command="show-modal" 等价于通过点击事件调用 settingsDialog.showModal()。 -->
-      </div>
-    </aside>
-
-    <main>
-      <section id="workspace"><h1>工作台</h1></section>
-      <p id="shell-message" role="status" aria-live="polite"></p>
-      <div id="plugin-panels"></div>
-    </main>
-
-    <dialog id="settings-dialog" aria-labelledby="settings-title" aria-describedby="settings-description" closedby="any">
-      <h2 id="settings-title">设置</h2>
-      <p id="settings-description">暂无可配置项。</p>
-      <form method="dialog"><button type="submit" autofocus>关闭</button></form>
-    </dialog>
+    <div id="app"></div>
   </body>
 </html>

@@ -5,7 +5,7 @@
  * 仅在显式执行 test:pack 时运行，不读取用户真实 Skills，不依赖源码目录或开发版 Electron。
  */
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { once } from 'node:events';
 import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -17,13 +17,19 @@ import { fileURLToPath } from 'node:url';
 test('packaged Windows app boots all plugin panels outside the repository', { timeout: 30000 }, async (t) => {
   const executable = fileURLToPath(new URL('../../../release/win-unpacked/Workplatform.exe', import.meta.url));
   const directory = await mkdtemp(join(tmpdir(), 'workplatform-packaged-'));
+  let child: ChildProcessWithoutNullStreams | undefined;
   const profile = join(directory, 'profile');
   const roaming = join(directory, 'roaming');
   const local = join(directory, 'local');
   await mkdir(roaming);
   await mkdir(local);
   t.after(async () => {
-    // 只清理本次创建且已验证归属的临时目录；无入参、无返回值。
+    // 先退出本测试启动的应用，再清理已验证归属的临时目录；无入参、无返回值。
+    if (child && child.exitCode === null && child.signalCode === null) {
+      const exited = once(child, 'exit');
+      child.kill();
+      await exited;
+    }
     assert.equal(dirname(directory), resolve(tmpdir()));
     assert.ok(directory.startsWith(join(tmpdir(), 'workplatform-packaged-')));
     await rm(directory, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
@@ -33,21 +39,13 @@ test('packaged Windows app boots all plugin panels outside the repository', { ti
     USERPROFILE: directory, HOME: directory, CODEX_HOME: join(directory, '.codex')
   };
   delete environment.ELECTRON_RUN_AS_NODE;
-  const child = spawn(executable, [
+  child = spawn(executable, [
     '--remote-debugging-port=0', '--remote-debugging-address=127.0.0.1',
     '--user-data-dir=' + profile, '--disable-gpu'
   ], { cwd: directory, env: environment, windowsHide: true, timeout: 25000 });
   let diagnostics = '';
   child.stdout.on('data', chunk => { diagnostics += String(chunk); });
   child.stderr.on('data', chunk => { diagnostics += String(chunk); });
-  t.after(async () => {
-    // 先退出本测试启动的应用，再允许前面的清理回调删除测试目录；无入参、无返回值。
-    if (child.exitCode === null && child.signalCode === null) {
-      const exited = once(child, 'exit');
-      child.kill();
-      await exited;
-    }
-  });
   const deadline = Date.now() + 15000;
   let port = '';
   while (!port && Date.now() < deadline) {

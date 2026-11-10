@@ -8,5 +8,6 @@
   "compilerOptions": {
     "lib": ["ES2023", "DOM"]
   },
-  "include": ["src/**/*.ts", "src/**/*.cts", "test/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.cts", "test/**/*.ts"],
+  "exclude": ["src/renderer.ts", "src/shell.ts"]
 }

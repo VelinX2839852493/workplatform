@@ -57,17 +57,27 @@ async function run() {
   assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#plugin-navigation a'), link => link.textContent)"), ['插件市场', 'Skills 管理', '工具']);
   checks.push('双目录列表及插件注册导航');
 
+  assert.equal(await evaluate("document.querySelector('#workspace').hidden"), false);
+  await evaluate("document.querySelector('.sidebar-footer button').click()");
+  assert.equal(await evaluate("document.querySelector('#settings-dialog').open"), true);
+  await evaluate("document.querySelector('#settings-dialog button').click()");
+  assert.equal(await evaluate("document.querySelector('#settings-dialog').open"), false);
+  checks.push('Vue 宿主默认工作台及原生设置对话框');
+
   await evaluate("location.hash = '#tools'");
   await waitFor("document.querySelector('#tool-form fieldset')?.disabled === false");
-  await evaluate(`document.querySelector('#tool-form [name=name]').value = '开发文档';
-    document.querySelector('#tool-form [name=url]').value = 'https://example.com/docs';
-    document.querySelector('#tool-form [name=category]').value = '开发';
+  assert.equal(await evaluate("document.querySelector('#plugin-navigation [aria-current=page]').hash"), '#tools');
+  assert.equal(await evaluate("document.querySelector('#workspace').hidden"), true);
+  assert.equal(await evaluate('document.adoptedStyleSheets.length'), 2);
+  await evaluate(`document.querySelector('#tool-form [name=name]').value = '开发文档'; document.querySelector('#tool-form [name=name]').dispatchEvent(new Event('input', { bubbles: true }));
+    document.querySelector('#tool-form [name=url]').value = 'https://example.com/docs'; document.querySelector('#tool-form [name=url]').dispatchEvent(new Event('input', { bubbles: true }));
+    document.querySelector('#tool-form [name=category]').value = '开发'; document.querySelector('#tool-form [name=category]').dispatchEvent(new Event('input', { bubbles: true }));
     document.querySelector('#tool-form').requestSubmit()`);
   await waitFor("document.querySelector('#tool-list a')?.textContent === '开发文档'");
   assert.equal(JSON.parse(await readFile(join(directory, 'config/tool/tools.json'), 'utf8'))[0].category, '开发');
-  await evaluate(`document.querySelector('#tool-form [name=name]').value = '参考资料';
-    document.querySelector('#tool-form [name=url]').value = 'https://example.org';
-    document.querySelector('#tool-form [name=category]').value = '参考';
+  await evaluate(`document.querySelector('#tool-form [name=name]').value = '参考资料'; document.querySelector('#tool-form [name=name]').dispatchEvent(new Event('input', { bubbles: true }));
+    document.querySelector('#tool-form [name=url]').value = 'https://example.org'; document.querySelector('#tool-form [name=url]').dispatchEvent(new Event('input', { bubbles: true }));
+    document.querySelector('#tool-form [name=category]').value = '参考'; document.querySelector('#tool-form [name=category]').dispatchEvent(new Event('input', { bubbles: true }));
     document.querySelector('#tool-form').requestSubmit()`);
   await waitFor("document.querySelectorAll('#tool-list a').length === 2");
   await evaluate("document.querySelector('#tool-filter').value = '开发'; document.querySelector('#tool-filter').dispatchEvent(new Event('change'))");
@@ -85,16 +95,18 @@ async function run() {
     assert.equal(BrowserWindow.getAllWindows().length, 1);
   } finally { shell.openExternal = originalOpen; }
   await evaluate(`document.querySelector('#tool-list [data-action="编辑"]').click();
-    document.querySelector('#tool-form [name=name]').value = '文档已更新';
-    document.querySelector('#tool-form [name=url]').value = 'https://example.net/new';
-    document.querySelector('#tool-form [name=category]').value = '参考';
+    document.querySelector('#tool-form [name=name]').value = '文档已更新'; document.querySelector('#tool-form [name=name]').dispatchEvent(new Event('input', { bubbles: true }));
+    document.querySelector('#tool-form [name=url]').value = 'https://example.net/new'; document.querySelector('#tool-form [name=url]').dispatchEvent(new Event('input', { bubbles: true }));
+    document.querySelector('#tool-form [name=category]').value = '参考'; document.querySelector('#tool-form [name=category]').dispatchEvent(new Event('input', { bubbles: true }));
     document.querySelector('#tool-form').requestSubmit()`);
   await waitFor("document.querySelector('#tool-list a')?.textContent === '文档已更新'");
   assert.equal(await evaluate("document.querySelector('#tool-filter').value"), '');
   await toolsFiber.dispose();
   await waitFor("!document.querySelector('[data-panel=tools]')");
+  assert.equal(await evaluate('document.adoptedStyleSheets.length'), 1);
   toolsFiber = await context.plugin(toolsPlugin, { directory: join(directory, 'config/tool') });
   await waitFor("document.querySelectorAll('#tool-list a').length === 2");
+  assert.equal(await evaluate('document.adoptedStyleSheets.length'), 2);
   assert.equal(await evaluate("document.querySelector('#tool-list a').href"), 'https://example.net/new');
   await evaluate("window.confirm = () => false; document.querySelector('#tool-list [data-action=删除]').click()");
   assert.equal(await evaluate("document.querySelectorAll('#tool-list a').length"), 2);
@@ -142,7 +154,9 @@ async function run() {
   checks.push('通过插件注册请求保存并更新版本');
 
   const saved = await readFile(file, 'utf8');
-  await evaluate("document.querySelector('#skill-content').value = 'invalid'; document.querySelector('#skill-content').dispatchEvent(new Event('input')); document.querySelector('#save-skill').click()");
+  await evaluate("document.querySelector('#skill-content').value = 'invalid'; document.querySelector('#skill-content').dispatchEvent(new Event('input'))");
+  await waitFor("document.querySelector('#save-skill').disabled === false");
+  await evaluate("document.querySelector('#save-skill').click()");
   await waitFor("document.querySelector('#skills-message').textContent.includes('frontmatter')");
   assert.equal(await readFile(file, 'utf8'), saved);
   await evaluate("window.confirm = () => true; document.querySelector('#reload-skill').click()");
@@ -150,7 +164,9 @@ async function run() {
   checks.push('校验失败保留草稿且不改文件');
 
   await writeFile(file, saved + '\nExternal edit');
-  await evaluate("document.querySelector('#skill-content').value += '\\nConflicting draft'; document.querySelector('#skill-content').dispatchEvent(new Event('input')); document.querySelector('#save-skill').click()");
+  await evaluate("document.querySelector('#skill-content').value += '\\nConflicting draft'; document.querySelector('#skill-content').dispatchEvent(new Event('input'))");
+  await waitFor("document.querySelector('#save-skill').disabled === false");
+  await evaluate("document.querySelector('#save-skill').click()");
   await waitFor("document.querySelector('#skills-message').textContent.includes('其他程序修改')");
   assert.ok(await evaluate("document.querySelector('#skill-content').value.includes('Conflicting draft')"));
   assert.ok((await readFile(file, 'utf8')).endsWith('External edit'));

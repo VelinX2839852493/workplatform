@@ -14,7 +14,8 @@
   "dependencies": {
     "@workplatform/ui-slots": "workspace:*",
     "@deepseek-ai/cordis": "^4.0.5",
-    "@workplatform/app-boot": "workspace:*"
+    "@workplatform/app-boot": "workspace:*",
+    "vue": "^3.5.45"
   },
   "scripts": {
     "test": "tsx --test test/*.test.ts"

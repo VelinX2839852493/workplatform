@@ -10,20 +10,25 @@
   "packageManager": "pnpm@11.7.0",
   "scripts": {
     "dev": "pnpm start",
-    "typecheck": "tsc -p packages/ui-slots/tsconfig.build.json && tsc --noEmit -p packages/ui-slots/tsconfig.json && tsc -p packages/boot/app-boot/tsconfig.build.json && tsc -p packages/plugin-market/tsconfig.build.json && tsc -p packages/skills-manager/tsconfig.build.json && tsc -p packages/tools/tsconfig.build.json && tsc --noEmit -p packages/core/tsconfig.json && tsc --noEmit -p packages/boot/app-boot/tsconfig.json && tsc --noEmit -p packages/plugin-market/tsconfig.json && tsc --noEmit -p packages/skills-manager/tsconfig.json && tsc --noEmit -p packages/tools/tsconfig.json && tsc --noEmit -p apps/elect/tsconfig.json",
-    "build": "tsc -p packages/ui-slots/tsconfig.build.json && tsc -p packages/core/tsconfig.build.json && tsc -p packages/boot/app-boot/tsconfig.build.json && tsc -p packages/plugin-market/tsconfig.build.json && tsc -p packages/skills-manager/tsconfig.build.json && tsc -p packages/tools/tsconfig.build.json && tsc -p apps/elect/tsconfig.build.json",
+    "typecheck": "tsc -p packages/ui-slots/tsconfig.build.json && tsc --noEmit -p packages/ui-slots/tsconfig.json && tsc -p packages/boot/app-boot/tsconfig.build.json && tsc -p packages/plugin-market/tsconfig.build.json && tsc -p packages/skills-manager/tsconfig.build.json && tsc -p packages/tools/tsconfig.build.json && tsc --noEmit -p packages/core/tsconfig.json && tsc --noEmit -p packages/boot/app-boot/tsconfig.json && tsc --noEmit -p packages/plugin-market/tsconfig.json && tsc --noEmit -p packages/skills-manager/tsconfig.json && tsc --noEmit -p packages/tools/tsconfig.json && tsc --noEmit -p apps/elect/tsconfig.json && node scripts/typecheck-ui.cjs --noEmit -p tsconfig.renderer.json",
+    "build": "tsc -p packages/ui-slots/tsconfig.build.json && tsc -p packages/core/tsconfig.build.json && tsc -p packages/boot/app-boot/tsconfig.build.json && tsc -p packages/plugin-market/tsconfig.build.json && tsc -p packages/skills-manager/tsconfig.build.json && tsc -p packages/tools/tsconfig.build.json && tsc -p apps/elect/tsconfig.build.json && pnpm run build:ui",
     "start": "pnpm run build && electron apps/elect",
     "pack": "pnpm run build && electron-builder --config electron-builder.yml --win --x64 --dir --publish never",
     "dist": "pnpm run build && electron-builder --config electron-builder.yml --win --x64 --publish never",
     "test:pack": "tsx --test apps/elect/test/packaged-app.smoke.ts",
     "test": "pnpm -r --if-present run test",
-    "check": "pnpm run typecheck && pnpm test && pnpm run build"
+    "check": "pnpm run typecheck && pnpm test && pnpm run build",
+    "build:ui": "node scripts/build-ui.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
     "electron": "^45.2.3",
     "electron-builder": "26.18.0",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "vite": "^8.3.7",
+    "vue-tsc": "^3.3.14",
+    "typescript-vue": "npm:typescript@~6.0.3"
   }
 }

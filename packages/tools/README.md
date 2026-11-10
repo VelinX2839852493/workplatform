@@ -1,6 +1,10 @@
 # 工具插件
 
-`@workplatform/tools` 通过 Cordis 注册“工具”侧边栏和原生 DOM 页面，支持网址的增删改查、
+界面模板位于 `src/View.vue`，通过外置脚本 `src/view.ts` 维护表单、筛选和请求状态，
+布局位于 `src/view.css`。`src/client.ts` 只适配通用面板的挂载与卸载，释放 Vue 实例和样式。
+Vue 模板预编译到本包 `dist/client.js`，沿用原有动态插件接口。
+
+`@workplatform/tools` 通过 Cordis 注册“工具”侧边栏和 Vue 页面，支持网址的增删改查、
 单级分类与分类筛选。分类随条目保存，空分类归入“未分类”；点击名字用系统默认浏览器打开网页。
 只允许 HTTP/HTTPS 网址，动态名字与分类按纯文本呈现。
 
